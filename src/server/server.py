@@ -35,11 +35,18 @@ def start_client_thread(client, addr):
 
 def main():
 
+    print("Initalizing Server...")
+
     with open("./server_config.json") as config_file:
         config = json.load(config_file)
         host = config["settings"]["host"]
         port = config["settings"]["port"]
         client_limit = config["settings"]["client_limit"]
+
+    print(f"Host ip address     : {host}")
+    print(f"Port number         : {port}")
+    print(f"Server client limit : {client_limit}")
+
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.bind((host, port))
@@ -53,7 +60,7 @@ def main():
             start_client_thread(connection, ip_addr)
 
     except KeyboardInterrupt:
-        print("Server shutting down")
+        print("\nServer shutting down")
         SHUTDOWN = True
         for connection in CONNECTED_DEVICES:
             connection.close()
