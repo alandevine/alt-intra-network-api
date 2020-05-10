@@ -5,68 +5,86 @@ from threading import Thread
 import json
 import socket
 
-# flag that is changed upon server shutdown
-SHUTDOWN = False
 
-# dictionary containing client connections
-CONNECTED_DEVICES = {}
+class Server:
 
+    def __init__(self, server_config_file):
+        """Constructor Class
 
-def client_thread(client, addr):
-    client.send("Connection to server established.".encode())
-    connected = True
+        :param server_config_file: path to json config file
+        :type server_config_file: str
+        """
 
-    while connected and not SHUTDOWN:
+        print("Initializing Server...")
+        self.connected_devices = {}
+        self.shutdown = False
+
+        self.server_config_file = server_config_file
+
+        with open(self.server_config_file) as config_file:
+            config = json.load(config_file)
+            self.host = config["settings"]["host"]
+            self.port = config["settings"]["port"]
+            self.client_limit = config["settings"]["client_limit"]
+
+        print(f"Host ip address     : {self.host}")
+        print(f"Port number         : {self.port}")
+        print(f"Server client limit : {self.client_limit}")
+
+        self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.soc.bind((self.host, self.port))
+        self.soc.listen(self.client_limit)
+
+    def start_client_thread(self, client, addr):
+        """Method for creating client threads
+        :param client:
+        :param addr:
+        """
+        th = Thread(target=self._client_thread, args=(client, addr))
+        th.start()
+        self.connected_devices[client]["thread"] = th
+
+    def _client_thread(self, client, addr):
+        """
+
+        :param client: New client socket
+        :type client: socket
+        :param addr: ip address for newly connected client
+        :type addr: str
+        """
+        client.send("Connection to server established.".encode())
+        connected = True
+
+        while connected and not self.shutdown:
+            try:
+                i = 0
+                client.send(f"{i}".encode())
+            except Exception as e:
+                print(f"Exception \"{e}\" detected from {addr}")
+                continue
+        client.close()
+
+    def start_server(self):
+        """
+
+        """
         try:
-            # Main logic here
-            pass
-        except OSError as e:
-            print(f"Exception \"{e}\" detected from {addr}")
-            continue
-    client.close()
+            while True:
+                connection, ip_addr = self.soc.accept()
+                connection.settimeout(60)
+                print(f"Device connected: {ip_addr}")
+                self.start_client_thread(connection, ip_addr)
+
+        except KeyboardInterrupt:
+
+            print("\nServer shutting down")
+            self.shutdown = True
+            for connection in self.connected_devices:
+                connection.close()
+            print("Clients disconnected")
+            self.soc.close()
 
 
-def start_client_thread(client, addr):
-    """Method for creating client threads"""
-    th = Thread(target=client_thread, args=(client, addr))
-    th.start()
-    CONNECTED_DEVICES[client]["thread"] = th
-
-
-def main():
-
-    print("Initalizing Server...")
-
-    with open("./server_config.json") as config_file:
-        config = json.load(config_file)
-        host = config["settings"]["host"]
-        port = config["settings"]["port"]
-        client_limit = config["settings"]["client_limit"]
-
-    print(f"Host ip address     : {host}")
-    print(f"Port number         : {port}")
-    print(f"Server client limit : {client_limit}")
-
-
-    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.bind((host, port))
-    soc.listen(client_limit)
-
-    try:
-        while True:
-            connection, ip_addr = soc.accept()
-            connection.settimeout(60)
-            print(f"Device connected: {ip_addr}")
-            start_client_thread(connection, ip_addr)
-
-    except KeyboardInterrupt:
-        print("\nServer shutting down")
-        SHUTDOWN = True
-        for connection in CONNECTED_DEVICES:
-            connection.close()
-        print("Clients disconnected")
-        soc.close()
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    serv = Server("server_config.json")
+    serv.start_server()
