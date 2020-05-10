@@ -1,0 +1,12 @@
+{ "network_settings":
+    {
+        "host": "127.0.0.1",
+        "port": 8080
+    },
+"hardware_settings":
+    {
+        "dispense_amount_ml": 10,
+        "minimum_amount_ml": 15,
+        "sanitizer_threshold": 0.20
+    }
+}
