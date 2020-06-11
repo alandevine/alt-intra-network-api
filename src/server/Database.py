@@ -45,6 +45,17 @@ class Database:
         self.cursor.execute(query, vals)
         self.db.commit()
 
+    def get_device_activity(self, device_id):
+        query = "SELECT * FROM deviceActivity WHERE id == :device_id"
+        self.cursor.execute(query, {"device_id": device_id})
+        device = self.cursor.fetchall()
+        return device
+
+    def get_all_device_activity(self):
+        self.cursor.execute("SELECT * FROM deviceActivity")
+        devices = self.cursor.fetchall()
+        return devices
+
     def _create_tables(self):
         """
         Creates Tables for database
@@ -53,7 +64,7 @@ class Database:
                 """
                     CREATE TABLE deviceActivity
                         (
-                           id   INT,
+                           id   TEXT,
                            date TEXT,
                            time TEXT,
                            type TEXT
@@ -81,9 +92,13 @@ class Database:
 
 if __name__ == '__main__':
     db = Database("test.db")
-    db.insert_device_activity(random.randint(1, 20), "2020/06/10", "17:11", "Dispense")
-    db.cursor.execute("SELECT * FROM deviceActivity")
-    rows = db.cursor.fetchall()
+    db.insert_device_activity(str(random.randint(5, 20)), "2020/06/10", "17:11", "Dispense")
+    db.insert_device_activity("2", "2020/06/10", "17:11", "Dispense")
 
-    for row in rows:
-        print(row)
+    print(db.get_all_device_activity())
+    print("------------------")
+    print(db.get_device_activity(2))
+
+
+    db.db.close()
+    os.remove("test.db")
