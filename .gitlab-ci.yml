@@ -1,0 +1,21 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - echo "Creating Virtual Environment"
+    - python3 -m venv venv
+    - echo "Sourcing Virtual Environment"
+    - source venv/bin/activate
+    - echo "Installing Dependencies"
+    - pip install -r requiremetns.txt
+  artifacts:
+    paths:
+      - venv/
+
+test:
+  stage: test
+  script:
+    - echo "Testing"
