@@ -5,6 +5,7 @@ stages:
 build:
   stage: build
   script:
+    - apt-get install python3 python3-venv
     - echo "Creating Virtual Environment"
     - python3 -m venv venv
     - echo "Sourcing Virtual Environment"
