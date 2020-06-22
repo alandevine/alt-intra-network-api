@@ -2,9 +2,12 @@ from flask import Flask, request
 import os
 import json
 import sqlite3
+import datetime
 
 app = Flask(__name__)
 database = "dispenser.db"
+
+N_DEVICES_CONNECTED = 0
 
 
 @app.route("/", methods=["GET"])
@@ -24,7 +27,33 @@ def get_device(device_id):
 
 @app.route("/api/devices", methods=["POST"])
 def add_new_device():
-    pass
+    msg = json.loads(request.get_data())
+    device_ip = msg["ip"]
+
+    global N_DEVICES_CONNECTED
+    N_DEVICES_CONNECTED += 1
+
+    id = N_DEVICES_CONNECTED
+
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = """
+                INSERT INTO devices
+                    (
+                         id,
+                         ip,
+                         dateTimeOfRegistration,
+                         location,
+                         dateLastMaintenance
+                    )
+                    VALUES (?, ?, ?, ?, ?)
+        """
+
+        entry = (id, device_ip, datetime.datetime.now().isoformat(), "SET DEVICE LOCATION", "N/A")
+        cursor.execute(query, entry)
+        conn.commit()
+
+    return str(id), 201
 
 
 @app.route("/api/activity", methods=["POST"])
@@ -77,13 +106,11 @@ def create_database():
             """
                 CREATE TABLE devices
                   (
-                     id                  TEXT,
-                     dataOfRegistration  TEXT,
-                     timeOfRegistration  TEXT,
-                     location            TEXT,
-                     batteryLevel        FLOAT,
-                     fluidLevel          FLOAT,
-                     dateLastMaintenance TEXT
+                     id                      TEXT,
+                     ip                      TEXT,
+                     dateTimeOfRegistration  TEXT,
+                     location                TEXT,
+                     dateLastMaintenance     TEXT
                   ) 
             """
         )

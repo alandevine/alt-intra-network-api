@@ -1,7 +1,7 @@
 import json
 import requests
 import os
-import sys
+import socket
 import time
 from datetime import datetime
 
@@ -25,8 +25,8 @@ class Client:
 
             self.sensor_path = config["hardware_settings"]["sensor_path"]
 
-        self.sensor_file = f"{os.getcwd()}/src/client/{self.sensor_path}"
-        self.id = 2
+        self.sensor_file = f"{self.sensor_path}"
+        self.id = None
 
         self.msg_backlog = []
 
@@ -41,12 +41,15 @@ class Client:
         debug_str.append("-" * len(max(debug_str, key=len)))
         print("\n".join(debug_str))
 
+        self.ip = socket.gethostbyname(socket.gethostname())
+        print(requests.post(f"http://{self.host}:{self.port}/api/devices", json.dumps({"ip": self.ip})))
+
     def client_loop(self):
         i = 1
         while True:
             print("run:", i)
             i += 1
-            if os.path.exists(self.sensor_file):
+            if os.path.exists(self.sensor_file) and self.id:
                 with open(self.sensor_file) as f:
                     activity = f.read()
                     dt = datetime.now().isoformat()
@@ -69,8 +72,6 @@ class Client:
             time.sleep(5)
 
 
-
-
 if __name__ == '__main__':
-    cli = Client("src/client/client_config.json")
+    cli = Client("client_config.json")
     cli.client_loop()
