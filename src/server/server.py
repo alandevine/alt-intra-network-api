@@ -15,14 +15,27 @@ def index():
     pass
 
 
-@app.route("/api/devices", methods=["GET"])
+@app.route("/api/devices/", methods=["GET"])
 def get_all_devices():
-    pass
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM devices"
+        cursor.execute(query)
+        device = cursor.fetchall()
+
+    return str(device), 201
 
 
 @app.route("/api/devices/<int:device_id>", methods=["GET"])
 def get_device(device_id):
-    pass
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM devices WHERE id == ?"
+        entry = (device_id, )
+        cursor.execute(query, entry)
+        device = cursor.fetchall()
+
+    return str(device), 201
 
 
 @app.route("/api/devices", methods=["POST"])
