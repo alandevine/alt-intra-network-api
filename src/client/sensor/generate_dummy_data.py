@@ -1,5 +1,4 @@
 import random
-import os
 import sys
 import time
 
@@ -20,7 +19,7 @@ def main():
             action = random.choice(actions)
             with open("entry", "w") as f:
                 f.write(action)
-        time.sleep(2)
+        time.sleep(10)
 
 
 if __name__ == "__main__":
