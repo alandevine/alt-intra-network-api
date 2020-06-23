@@ -5,6 +5,12 @@ import socket
 import time
 from datetime import datetime
 
+"""
+    TODO:
+        + write id to json config file
+        + implement settings changes
+"""
+
 
 class Client:
 
@@ -42,34 +48,39 @@ class Client:
         print("\n".join(debug_str))
 
         self.ip = socket.gethostbyname(socket.gethostname())
-        print(requests.post(f"http://{self.host}:{self.port}/api/devices", json.dumps({"ip": self.ip})))
+        self.id = requests.post(f"http://{self.host}:{self.port}/api/devices", json.dumps({"ip": self.ip})).text
+        print(f"Device ID: {self.id}")
 
     def client_loop(self):
-        i = 1
+        print(os.getcwd())
         while True:
-            print("run:", i)
-            i += 1
-            if os.path.exists(self.sensor_file) and self.id:
-                with open(self.sensor_file) as f:
-                    activity = f.read()
-                    dt = datetime.now().isoformat()
-                    msg = json.dumps({"device_id": self.id, "activity": activity, "date_time": dt})
+            if self.id is None:
+                continue
 
-                    url = f"http://{self.host}:{self.port}/api/activity"
+            with open(self.sensor_file, "w+") as f:
+                activity = f.read()
+                f.write("")
+                if activity == "":
+                    continue
 
-                    try:
-                        requests.post(url, msg)
+                print("opening entry file")
 
-                        if len(self.msg_backlog) > 0:
-                            for old_msg in self.msg_backlog:
-                                requests.post(url, old_msg)
-                            self.msg_backlog.clear()
+                dt = datetime.now().isoformat()
+                msg = json.dumps({"device_id": self.id, "activity": activity, "date_time": dt})
 
-                    except ConnectionError as e:
-                        print(e)
-                        self.msg_backlog.append(msg)
+                url = f"http://{self.host}:{self.port}/api/activity"
 
-            time.sleep(5)
+                try:
+                    requests.post(url, msg)
+
+                    if len(self.msg_backlog) > 0:
+                        for old_msg in self.msg_backlog:
+                            requests.post(url, old_msg)
+                        self.msg_backlog.clear()
+
+                except ConnectionError as e:
+                    print(e)
+                    self.msg_backlog.append(msg)
 
 
 if __name__ == '__main__':

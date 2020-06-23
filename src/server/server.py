@@ -3,17 +3,31 @@ import os
 import json
 import sqlite3
 import datetime
+import requests
+
+"""
+    TODO:
+        + Add table, device settings
+"""
 
 app = Flask(__name__)
 database = "dispenser.db"
-
-N_DEVICES_CONNECTED = 0
 
 
 @app.route("/", methods=["GET"])
 def index():
     pass
 
+@app.route("/api/devices/dispense_vol/<int:device_id> <int:vol>", methods=["POST"])
+def set_dispense_vol(device_id, vol):
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT ip FROM devices WHERE id == ?"
+        val = (device_id, )
+        cursor.execute(query, val)
+        ip = cursor.fetchall()[0][0]
+
+    requests.post(f"http://{ip}", str(vol))
 
 @app.route("/api/devices/", methods=["GET"])
 def get_all_devices():
@@ -43,11 +57,36 @@ def add_new_device():
     msg = json.loads(request.get_data())
     device_ip = msg["ip"]
 
-    global N_DEVICES_CONNECTED
-    N_DEVICES_CONNECTED += 1
+    # Check to see if ip exists in database
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT id FROM devices WHERE ip == ?"
+        val = (device_ip, )
+        cursor.execute(query, val)
+        # because id is a unique value only one row should be retrieved
+        data = cursor.fetchone()
+        print(data)
 
-    id = N_DEVICES_CONNECTED
+    id = data
+    if id is not None:
+        return str(id), 201
 
+    # find highest id number
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT MAX(id) FROM devices WHERE ip == ?"
+        val = (device_ip,)
+        cursor.execute(query, val)
+        # because id is a unique value only one row should be retrieved
+        data = cursor.fetchone()
+    id = data[0]
+
+    if id is not None:
+        id = int(data[0]) + 1
+    else:
+        id = 1
+
+    # add device to database
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
         query = """
@@ -60,7 +99,7 @@ def add_new_device():
                          dateLastMaintenance
                     )
                     VALUES (?, ?, ?, ?, ?)
-        """
+            """
 
         entry = (id, device_ip, datetime.datetime.now().isoformat(), "SET DEVICE LOCATION", "N/A")
         cursor.execute(query, entry)
@@ -119,8 +158,8 @@ def create_database():
             """
                 CREATE TABLE devices
                   (
-                     id                      TEXT,
-                     ip                      TEXT,
+                     id                      TEXT   UNIQUE,
+                     ip                      TEXT   UNIQUE,
                      dateTimeOfRegistration  TEXT,
                      location                TEXT,
                      dateLastMaintenance     TEXT
