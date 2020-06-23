@@ -1,0 +1,54 @@
+{
+    "devices": [
+        {
+            "device_id": "1",
+            "dispense_amount": "10",
+            "battery_level": "0.80",
+            "sanitizer_levels": "0.20",
+            "sanitizer_capacity": "unknown",
+            "device_location": "Reception",
+            "date_time": "2020/06/22",
+            "dateLastMaintenance": "N/A"
+        },
+        {
+            "device_id": "2",
+            "dispense_amount": "10",
+            "battery_level": "0.95",
+            "sanitizer_levels": "0.80",
+            "sanitizer_capacity": "unknown",
+            "device_location": "First Floor",
+            "date_time": "2020/06/23",
+            "dateLastMaintenance": "N/A"
+        },
+        {
+            "device_id": "3",
+            "dispense_amount": "10",
+            "battery_level": "0.70",
+            "sanitizer_levels": "0.95",
+            "sanitizer_capacity": "unknown",
+            "device_location": "Reception",
+            "date_time": "2020/06/24",
+            "dateLastMaintenance": "N/A"
+        },
+        {
+            "device_id": "4",
+            "dispense_amount": "10",
+            "battery_level": "0.87",
+            "sanitizer_levels": "0.95",
+            "sanitizer_capacity": "unknown",
+            "device_location": "Ground Floor",
+            "date_time": "2020/06/24",
+            "dateLastMaintenance": "N/A"
+        },
+        {
+            "device_id": "5",
+            "dispense_amount": "10",
+            "battery_level": "0.96",
+            "sanitizer_levels": "0.95",
+            "sanitizer_capacity": "unknown",
+            "device_location": "Ground Floor",
+            "date_time": "2020/06/24",
+            "dateLastMaintenance": "n/A"
+        }
+    ]
+}

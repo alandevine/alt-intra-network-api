@@ -1,0 +1,19 @@
+.dashboard-body {
+    padding: 25px;
+}
+
+.dashboard-container {
+    padding-bottom: 7px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.page-body {
+    margin: 25px;
+}
+
+.view-button {
+    text-align: center;
+    width: 50px;
+    /* background-color: coral; */
+}
