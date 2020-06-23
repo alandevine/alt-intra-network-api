@@ -3,6 +3,7 @@ import os
 import json
 import sqlite3
 import datetime
+import requests
 
 app = Flask(__name__)
 database = "dispenser.db"
@@ -14,6 +15,16 @@ N_DEVICES_CONNECTED = 0
 def index():
     pass
 
+@app.route("/api/devices/dispense_vol/<int:device_id> <int:vol>", methods=["POST"])
+def set_dispense_vol(device_id, vol):
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT ip FROM devices WHERE id == ?"
+        val = (device_id, )
+        cursor.execute(query, val)
+        ip = cursor.fetchall()[0][0]
+
+    requests.post(f"http://{ip}", str(vol))
 
 @app.route("/api/devices/", methods=["GET"])
 def get_all_devices():
@@ -43,10 +54,30 @@ def add_new_device():
     msg = json.loads(request.get_data())
     device_ip = msg["ip"]
 
-    global N_DEVICES_CONNECTED
-    N_DEVICES_CONNECTED += 1
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT id FROM devices WHERE ip == ?"
+        val = (device_ip, )
+        cursor.execute(query, val)
+        # because id is a unique value only one row should be retrieved
+        data = cursor.fetchone()
+        print(data)
 
-    id = N_DEVICES_CONNECTED
+    id = data
+    if id is None:
+        with sqlite3.connect(database) as conn:
+            cursor = conn.cursor()
+            query = "SELECT MAX(id) FROM devices WHERE ip == ?"
+            val = (device_ip,)
+            cursor.execute(query, val)
+            # because id is a unique value only one row should be retrieved
+            data = cursor.fetchone()
+            print(type(data))
+            print(data[0])
+        id = data[0]
+
+    if id is None:
+        id = 1
 
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
@@ -119,8 +150,8 @@ def create_database():
             """
                 CREATE TABLE devices
                   (
-                     id                      TEXT,
-                     ip                      TEXT,
+                     id                      TEXT   UNIQUE,
+                     ip                      TEXT   UNIQUE,
                      dateTimeOfRegistration  TEXT,
                      location                TEXT,
                      dateLastMaintenance     TEXT

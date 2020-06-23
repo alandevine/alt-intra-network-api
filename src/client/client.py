@@ -42,14 +42,17 @@ class Client:
         print("\n".join(debug_str))
 
         self.ip = socket.gethostbyname(socket.gethostname())
-        print(requests.post(f"http://{self.host}:{self.port}/api/devices", json.dumps({"ip": self.ip})))
+        self.id = requests.post(f"http://{self.host}:{self.port}/api/devices", json.dumps({"ip": self.ip})).text
+        print(f"Device ID: {self.id}")
 
     def client_loop(self):
-        i = 1
+        print(os.getcwd())
         while True:
-            print("run:", i)
-            i += 1
-            if os.path.exists(self.sensor_file) and self.id:
+            if self.id is None:
+                continue
+
+            if os.path.exists(f"{os.getcwd()}/{self.sensor_file}"):
+                print("opening entry file")
                 with open(self.sensor_file) as f:
                     activity = f.read()
                     dt = datetime.now().isoformat()
@@ -68,7 +71,6 @@ class Client:
                     except ConnectionError as e:
                         print(e)
                         self.msg_backlog.append(msg)
-
             time.sleep(5)
 
 
