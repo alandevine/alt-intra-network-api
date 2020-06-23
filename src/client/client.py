@@ -51,27 +51,30 @@ class Client:
             if self.id is None:
                 continue
 
-            if os.path.exists(f"{os.getcwd()}/{self.sensor_file}"):
+            with open(self.sensor_file, "w+") as f:
+                activity = f.read()
+                f.write("")
+                if activity == "":
+                    continue
+
                 print("opening entry file")
-                with open(self.sensor_file) as f:
-                    activity = f.read()
-                    dt = datetime.now().isoformat()
-                    msg = json.dumps({"device_id": self.id, "activity": activity, "date_time": dt})
 
-                    url = f"http://{self.host}:{self.port}/api/activity"
+                dt = datetime.now().isoformat()
+                msg = json.dumps({"device_id": self.id, "activity": activity, "date_time": dt})
 
-                    try:
-                        requests.post(url, msg)
+                url = f"http://{self.host}:{self.port}/api/activity"
 
-                        if len(self.msg_backlog) > 0:
-                            for old_msg in self.msg_backlog:
-                                requests.post(url, old_msg)
-                            self.msg_backlog.clear()
+                try:
+                    requests.post(url, msg)
 
-                    except ConnectionError as e:
-                        print(e)
-                        self.msg_backlog.append(msg)
-            time.sleep(5)
+                    if len(self.msg_backlog) > 0:
+                        for old_msg in self.msg_backlog:
+                            requests.post(url, old_msg)
+                        self.msg_backlog.clear()
+
+                except ConnectionError as e:
+                    print(e)
+                    self.msg_backlog.append(msg)
 
 
 if __name__ == '__main__':
