@@ -13,8 +13,8 @@ def main():
 
     actions = ["dispense", "alerted"]
 
-    if os.path.exists("entry"):
-        while True:
+    while True:
+        if os.path.exists("entry"):
             sample = random.uniform(0, 1)
             if sample < freq:
                 action = random.choice(actions)
