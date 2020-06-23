@@ -1,6 +1,7 @@
 import random
 import os
 import sys
+import time
 
 
 def main():
@@ -14,12 +15,12 @@ def main():
     actions = ["dispense", "alerted"]
 
     while True:
-        if os.path.exists("entry"):
-            sample = random.uniform(0, 1)
-            if sample < freq:
-                action = random.choice(actions)
-                with open("entry", "w") as f:
-                    f.write(action)
+        sample = random.uniform(0, 1)
+        if sample < freq:
+            action = random.choice(actions)
+            with open("entry", "w") as f:
+                f.write(action)
+        time.sleep(2)
 
 
 if __name__ == "__main__":
