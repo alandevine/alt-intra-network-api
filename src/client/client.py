@@ -5,6 +5,12 @@ import socket
 import time
 from datetime import datetime
 
+"""
+    TODO:
+        + write id to json config file
+        + implement settings changes
+"""
+
 
 class Client:
 

@@ -5,10 +5,13 @@ import sqlite3
 import datetime
 import requests
 
+"""
+    TODO:
+        + Add table, device settings
+"""
+
 app = Flask(__name__)
 database = "dispenser.db"
-
-N_DEVICES_CONNECTED = 0
 
 
 @app.route("/", methods=["GET"])
