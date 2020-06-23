@@ -54,6 +54,7 @@ def add_new_device():
     msg = json.loads(request.get_data())
     device_ip = msg["ip"]
 
+    # Check to see if ip exists in database
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
         query = "SELECT id FROM devices WHERE ip == ?"
@@ -64,21 +65,25 @@ def add_new_device():
         print(data)
 
     id = data
-    if id is None:
-        with sqlite3.connect(database) as conn:
-            cursor = conn.cursor()
-            query = "SELECT MAX(id) FROM devices WHERE ip == ?"
-            val = (device_ip,)
-            cursor.execute(query, val)
-            # because id is a unique value only one row should be retrieved
-            data = cursor.fetchone()
-            print(type(data))
-            print(data[0])
-        id = data[0]
+    if id is not None:
+        return str(id), 201
 
-    if id is None:
+    # find highest id number
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        query = "SELECT MAX(id) FROM devices WHERE ip == ?"
+        val = (device_ip,)
+        cursor.execute(query, val)
+        # because id is a unique value only one row should be retrieved
+        data = cursor.fetchone()
+    id = data[0]
+
+    if id is not None:
+        id = int(data[0]) + 1
+    else:
         id = 1
 
+    # add device to database
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
         query = """
@@ -91,7 +96,7 @@ def add_new_device():
                          dateLastMaintenance
                     )
                     VALUES (?, ?, ?, ?, ?)
-        """
+            """
 
         entry = (id, device_ip, datetime.datetime.now().isoformat(), "SET DEVICE LOCATION", "N/A")
         cursor.execute(query, entry)
