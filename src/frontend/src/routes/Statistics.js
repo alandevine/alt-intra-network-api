@@ -12,7 +12,7 @@ class Statistics extends React.Component {
                     <MyNavbar />
                 </div>
                 <div className="page-body">
-                    <p>To be implemented</p>
+                    <p>Displays dispenser statistics.</p>
                 </div>
             </div>
         )

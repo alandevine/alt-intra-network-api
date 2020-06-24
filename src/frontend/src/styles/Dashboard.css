@@ -17,3 +17,10 @@
     width: 50px;
     /* background-color: coral; */
 }
+
+.page-header {
+    padding-left: 25px;
+    padding-top: 25px;
+    padding-bottom: 20px;
+    background-color: #f2f2f2;
+  }

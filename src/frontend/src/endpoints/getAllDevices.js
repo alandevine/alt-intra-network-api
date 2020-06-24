@@ -1,9 +1,9 @@
 export default async function getAllDevices() {
     try {
-        const response = await fetch({
-            method: 'GET',
-            url: '/api/devices',
+        const response = await fetch(`/api/devices`, {
+            method: 'GET'
         });
+        console.log(response)
         return response.devices;
     } catch(e) {
         return [];
