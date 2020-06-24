@@ -1,9 +1,7 @@
+from datetime import datetime
 import json
 import requests
-import os
 import socket
-import time
-from datetime import datetime
 
 """
     TODO:
@@ -52,18 +50,17 @@ class Client:
         print(f"Device ID: {self.id}")
 
     def client_loop(self):
-        print(os.getcwd())
         while True:
+            # client should not be able to send data before receiving id from server
             if self.id is None:
                 continue
 
             with open(self.sensor_file, "w+") as f:
                 activity = f.read()
+                # clear sensor file
                 f.write("")
                 if activity == "":
                     continue
-
-                print("opening entry file")
 
                 dt = datetime.now().isoformat()
                 msg = json.dumps({"device_id": self.id, "activity": activity, "date_time": dt})
