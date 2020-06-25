@@ -18,6 +18,7 @@ database = "dispenser.db"
 def index():
     pass
 
+
 @app.route("/api/devices/dispense_vol/<int:device_id> <int:vol>", methods=["POST"])
 def set_dispense_vol(device_id, vol):
     with sqlite3.connect(database) as conn:
@@ -28,6 +29,7 @@ def set_dispense_vol(device_id, vol):
         ip = cursor.fetchall()[0][0]
 
     requests.post(f"http://{ip}", str(vol))
+
 
 @app.route("/api/devices/", methods=["GET"])
 def get_all_devices():
@@ -67,9 +69,9 @@ def add_new_device():
         data = cursor.fetchone()
         print(data)
 
-    id = data
-    if id is not None:
-        return str(id), 201
+    device_id = data
+    if device_id is not None:
+        return str(device_id), 201
 
     # find highest id number
     with sqlite3.connect(database) as conn:
@@ -79,12 +81,12 @@ def add_new_device():
         cursor.execute(query, val)
         # because id is a unique value only one row should be retrieved
         data = cursor.fetchone()
-    id = data[0]
+    device_id = data[0]
 
-    if id is not None:
-        id = int(data[0]) + 1
+    if device_id is not None:
+        device_id = int(data[0]) + 1
     else:
-        id = 1
+        device_id = 1
 
     # add device to database
     with sqlite3.connect(database) as conn:
@@ -101,11 +103,11 @@ def add_new_device():
                     VALUES (?, ?, ?, ?, ?)
             """
 
-        entry = (id, device_ip, datetime.datetime.now().isoformat(), "SET DEVICE LOCATION", "N/A")
+        entry = (device_id, device_ip, datetime.datetime.now().isoformat(), "SET DEVICE LOCATION", "N/A")
         cursor.execute(query, entry)
         conn.commit()
 
-    return str(id), 201
+    return str(device_id), 201
 
 
 @app.route("/api/activity", methods=["POST"])
